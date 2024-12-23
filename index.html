@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #messages {
+            list-style-type: none;
+            padding: 0;
+        }
+        #messages li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<h2>WebSocket Chat</h2>
+
+<ul id="messages"></ul> <!-- To display incoming messages -->
+
+<!-- Input and Send Button -->
+<input type="text" id="messageInput" placeholder="Type your message...">
+<button id="sendMessageButton">Send Message</button>
+
+<script>
+    // Create WebSocket connection
+    const ws = new WebSocket('ws://localhost:42069'); // Update with your server URL
+
+    // Listen for messages from the server
+    ws.onmessage = function(event) {
+        console.log('Message from server: ', event.data);
+
+        // Display incoming messages in the <ul> list
+        const messageList = document.getElementById('messages');
+        const newMessage = document.createElement('li');
+        newMessage.textContent = `Server: ${event.data}`;
+        messageList.appendChild(newMessage);
+    };
+
+    // Send message to the server when the button is clicked
+    const sendButton = document.getElementById('sendMessageButton');
+    const messageInput = document.getElementById('messageInput');
+
+    sendButton.onclick = function() {
+        const message = messageInput.value;
+        if (message && ws.readyState === WebSocket.OPEN) {
+            console.log('Sending message:', message);  // This should log when the button is clicked
+            ws.send(message);
+            // Display the sent message in the list
+            const messageList = document.getElementById('messages');
+            const newMessage = document.createElement('li');
+            newMessage.textContent = `You: ${message}`;
+            messageList.appendChild(newMessage);
+            // Clear the input field
+            messageInput.value = '';
+        }
+    };
+
+    ws.onopen = () => {
+        console.log('Connected to WebSocket server');
+    };
+
+    ws.onerror = (error) => {
+        console.log('WebSocket error: ', error);
+    };
+
+    ws.onclose = () => {
+        console.log('WebSocket connection closed');
+    };
+</script>
+
+</body>
+</html>
